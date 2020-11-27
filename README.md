@@ -34,18 +34,18 @@ GET -> http://127.0.0.1:8000/api/getproduct/ID
 
 POST -> http://127.0.0.1:8000/api/addproduct
 REQUEST_BODY{
-Name: text
-Title: text
-Price: number
-Image: file
+name: text
+title: text
+price: number
+image: file
 }
 
 PUT -> http://127.0.0.1:8000/api/updateproduct/ID
 REQUEST_BODY{
-Name: text
-Title: text
-Price: number
-Image: file
+name: text
+title: text
+price: number
+image: file
 }
 
 DELETE -> http://127.0.0.1:8000/api/deleteproduct/ID
@@ -58,14 +58,14 @@ GET -> http://127.0.0.1:8000/api/getuser/ID
 
 POST -> http://127.0.0.1:8000/api/adduser
 REQUEST_BODY{
-Name: text
-Email: email
+name: text
+email: email
 }
 
 PUT -> http://127.0.0.1:8000/api/getuser/ID
 REQUEST_BODY{
-Name: text
-Email: email
+name: text
+email: email
 }
 
 DELETE -> http://127.0.0.1:8000/api/deleteuser/ID
