@@ -48,14 +48,15 @@ def add_product(request):
 
     try:
         product = ProductItem.objects.create(
-            name=request.body['name'],
-            title=request.body['title'],
-            price=request.body['price'],
-            image=request.FILES["image"]
+            name=request.data['name'],
+            title=request.data['title'],
+            price=request.data['price'],
+            image=request.data['image']
         )
-
-        serializer = ProductItemSerializer(product)
-        return JsonResponse({'products': serializer.data}, safe=False, status=status.HTTP_201_CREATED)
+        serializer = ProductItemSerializer(data=product)
+        if serializer.is_valid():
+            serializer.save()
+        return JsonResponse({'Product': request.data}, safe=False, status=status.HTTP_201_CREATED)
     except ObjectDoesNotExist as e:
         return JsonResponse({'error': str(e)}, safe=False, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
@@ -67,14 +68,21 @@ def add_product(request):
 @csrf_exempt
 @permission_classes([IsAuthenticated])
 def update_product(request, product_id):
-    payload = json.loads(request.body)
+
     try:
         product_item = ProductItem.objects.filter(id=product_id)
-        # returns 1 or 0
-        product_item.update(**payload)
+        product_item.update(
+            name=request.data['name'],
+            title=request.data['title'],
+            price=request.data['price'],
+            image=request.data['image']
+        )
         product = ProductItem.objects.get(id=product_id)
-        serializer = ProductItemSerializer(product)
-        return JsonResponse({'product': serializer.data}, safe=False, status=status.HTTP_200_OK)
+        serializer = ProductItemSerializer(data=product)
+        if serializer.is_valid():
+            serializer.save()
+
+        return JsonResponse({'Product': request.data}, safe=False, status=status.HTTP_200_OK)
     except ObjectDoesNotExist as e:
         return JsonResponse({'error': str(e)}, safe=False, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
@@ -89,7 +97,7 @@ def delete_product(request, product_id):
     try:
         product = ProductItem.objects.get(id=product_id)
         product.delete()
-        return JsonResponse({'completed': 'product was deleted'}, safe=False, status=status.HTTP_200_OK)
+        return JsonResponse({'Deleted': request.data}, safe=False, status=status.HTTP_200_OK)
     except ObjectDoesNotExist as e:
         return JsonResponse({'error': str(e)}, safe=False, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
@@ -125,19 +133,21 @@ def get_user(request, user_id):
 @csrf_exempt
 @permission_classes([IsAuthenticated])
 def add_user(request):
-    payload = json.loads(request.body)
-    name = payload['name']
-    email = payload["email"]
+
+    name = request.data['name']
+    email = request.data["email"]
     try:
         validators.validate_email(email)
         if len(name) < 5:
             raise ValidationError("name is too short")
         user = UserAccount.objects.create(
-            name=payload["name"],
-            email=payload["email"]
+            name=request.data['name'],
+            email=request.data["email"]
         )
-        serializer = UserAccountSerializer(user)
-        return JsonResponse({'user accounts': serializer.data}, safe=False, status=status.HTTP_201_CREATED)
+        serializer = UserAccountSerializer(data=user)
+        if serializer.is_valid():
+            serializer.save()
+        return JsonResponse({'user': request.data}, safe=False, status=status.HTTP_201_CREATED)
     except ValidationError as e:
         return JsonResponse({'error': str(e)}, safe=False, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     except ObjectDoesNotExist as e:
@@ -151,20 +161,24 @@ def add_user(request):
 @csrf_exempt
 @permission_classes([IsAuthenticated])
 def update_user(request, user_id):
-    payload = json.loads(request.body)
-    name = payload["name"]
-    email = payload["email"]
+
+    name = request.data['name']
+    email = request.data["email"]
 
     try:
         if len(name) < 5:
             raise ValidationError("name is too short")
         validators.validate_email(email)
         user_account = UserAccount.objects.filter(id=user_id)
-        # returns 1 or 0
-        user_account.update(**payload)
+        user_account.update(
+            name=request.data['name'],
+            email=request.data['email']
+        )
         user = UserAccount.objects.get(id=user_id)
-        serializer = UserAccountSerializer(user)
-        return JsonResponse({'user': serializer.data}, safe=False, status=status.HTTP_200_OK)
+        serializer = UserAccountSerializer(data=user)
+        if serializer.is_valid():
+            serializer.save()
+        return JsonResponse({'user': request.data}, safe=False, status=status.HTTP_200_OK)
     except ValidationError as e:
         return JsonResponse({'error': str(e)}, safe=False, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     except ObjectDoesNotExist as e:
@@ -181,7 +195,7 @@ def delete_user(request, user_id):
     try:
         user = UserAccount.objects.get(id=user_id)
         user.delete()
-        return JsonResponse({'completed': 'user was deleted'}, safe=False, status=status.HTTP_200_OK)
+        return JsonResponse({'deleted': request.data}, safe=False, status=status.HTTP_200_OK)
     except ObjectDoesNotExist as e:
         return JsonResponse({'error': str(e)}, safe=False, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
